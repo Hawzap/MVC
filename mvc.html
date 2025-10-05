@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="ru">
+    <head>
+        <meta charset="utf-8" />
+        <title>MVC</title>
+        <style>
+            body {
+                font-family: Arial;
+                padding: 20px;
+            }
+            input {
+                padding: 5px;
+            }
+            button {
+                margin-left: 5px;
+            }
+            li {
+                margin: 5px 0;
+            }
+        </style>
+    </head>
+    <body>
+        <h1>MVC на JS</h1>
+        <div id="app"></div>
+
+        <script>
+            class Model {
+                constructor() {
+                    this.items = [];
+                }
+                add(item) {
+                    if (item.trim()) {
+                        this.items.push(item);
+                    }
+                }
+                remove(index) {
+                    this.items.splice(index, 1);
+                }
+            }
+
+            class View {
+                constructor(root) {
+                    this.root = root;
+                    this.root.innerHTML = `
+              <input id="input" placeholder="Введіть задачу" />
+              <button id="add">Додати</button>
+              <ul id="list"></ul>
+            `;
+                    this.input = this.root.querySelector("#input");
+                    this.addBtn = this.root.querySelector("#add");
+                    this.list = this.root.querySelector("#list");
+                }
+
+                render(items) {
+                    this.list.innerHTML = "";
+                    items.forEach((item, index) => {
+                        const li = document.createElement("li");
+                        li.textContent = item;
+                        const btn = document.createElement("button");
+                        btn.textContent = "Видалити";
+                        btn.onclick = () => this.onRemove(index);
+                        li.appendChild(btn);
+                        this.list.appendChild(li);
+                    });
+                }
+
+                bindAdd(handler) {
+                    this.addBtn.onclick = () => handler(this.input.value);
+                }
+
+                bindRemove(handler) {
+                    this.onRemove = handler;
+                }
+            }
+
+            class Controller {
+                constructor(model, view) {
+                    this.model = model;
+                    this.view = view;
+
+                    this.view.bindAdd(this.handleAdd.bind(this));
+                    this.view.bindRemove(this.handleRemove.bind(this));
+
+                    this.view.render(this.model.items);
+                }
+
+                handleAdd(text) {
+                    this.model.add(text);
+                    this.view.input.value = "";
+                    this.view.render(this.model.items);
+                }
+
+                handleRemove(index) {
+                    this.model.remove(index);
+                    this.view.render(this.model.items);
+                }
+            }
+
+            new Controller(
+                new Model(),
+                new View(document.getElementById("app"))
+            );
+        </script>
+    </body>
+</html>
